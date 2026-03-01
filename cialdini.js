@@ -1,4 +1,4 @@
-const TRIGGERS = ["authority","urgency","scarcity","social_proof","reciprocity","liking"];
+const TRIGGERS = ["authority", "urgency", "scarcity", "social_proof", "reciprocity", "liking"];
 
 function calculateProfile(answers) {
   // answers = [{ trigger: "urgency", weight: 3 }, ...]
@@ -12,9 +12,9 @@ function calculateProfile(answers) {
 
   // Normalize to 0-100
   // Each trigger appears as a primary (weight 3) at least once or twice, and secondary (weight 2)
-  // Let's set a logical max for normalizing. In our dataset, a trigger can get max ~6 points if answered consistently.
-  // Actually, to make the graph look good, we normalize around 6 points = 100%
-  const maxPossible = 6; 
+  // Let's set a logical max for normalizing. In our dataset, a trigger can get max ~5-6 points if answered consistently.
+  // Actually, to make the graph look good, we normalize around 5.5 points = 100%
+  const maxPossible = 5.5;
   const normalized = {};
   TRIGGERS.forEach(t => {
     let score = Math.round((raw[t] / maxPossible) * 100);
@@ -27,7 +27,7 @@ function calculateProfile(answers) {
     .sort((a, b) => b.score - a.score);
 
   // Overall Resilience is inverse of top 2 vulnerabilities
-  const top2Avg = Math.round(ranked.slice(0,2).reduce((s, r) => s + r.score, 0) / 2);
+  const top2Avg = Math.round(ranked.slice(0, 2).reduce((s, r) => s + r.score, 0) / 2);
   const overallResilience = 100 - top2Avg;
 
   return { normalized, ranked, overallResilience };
