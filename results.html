@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, viewport-fit=cover">
+    <title>PsychShield 🧠 - Your Vulnerability Profile</title>
+
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1E1B4B">
+
+    <!-- Chart.js for radar chart -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Transformers.js imported dynamically -->
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet" />
+
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Results Specific CSS */
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--dark);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            font-size: 1.5rem;
+            font-weight: 700;
+            transition: opacity 0.5s;
+        }
+
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .results-container {
+            padding: 40px 24px;
+            max-width: 1000px;
+            margin: 0 auto;
+            display: none;
+        }
+
+        .score-badge {
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 16px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            text-align: center;
+            margin-bottom: 32px;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .score-high {
+            color: var(--red);
+            border-left: 6px solid var(--red);
+        }
+
+        .score-med {
+            color: var(--amber);
+            border-left: 6px solid var(--amber);
+        }
+
+        .score-low {
+            color: var(--green);
+            border-left: 6px solid var(--green);
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 32px;
+            margin-bottom: 40px;
+        }
+
+        .radar-container {
+            background: var(--surface);
+            padding: 24px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            height: 350px;
+            position: relative;
+        }
+
+        .weakness-list {
+            background: var(--surface);
+            padding: 32px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+
+        .weakness-list h3 {
+            margin-bottom: 24px;
+            font-size: 1.2rem;
+            color: var(--text-primary);
+        }
+
+        .weakness-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+            font-weight: 600;
+        }
+
+        .weakness-item:last-child {
+            border-bottom: none;
+        }
+
+        /* WhatsApp Simulation */
+        .attack-card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 40px;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s;
+        }
+
+        .attack-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .whatsapp-container {
+            background: #E5DDD5;
+            padding: 20px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .whatsapp-header {
+            background: #075E54;
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: -20px -20px 20px -20px;
+            position: relative;
+        }
+
+        .wa-avatar {
+            background: #ccc;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            overflow: hidden;
+        }
+
+        .wa-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .wa-status {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .wa-danger-badge {
+            position: absolute;
+            right: 16px;
+            top: 16px;
+            background: #FF9800;
+            color: #fff;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 800;
+            font-size: 10px;
+            letter-spacing: 0.5px;
+        }
+
+        .wa-bubble {
+            background: #fff;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border-top-left-radius: 0;
+            max-width: 85%;
+            font-size: 14.5px;
+            line-height: 1.4;
+            color: #111;
+            position: relative;
+            box-shadow: 0 1px 0.5px rgba(0, 0, 0, 0.13);
+            display: inline-block;
+            margin-bottom: 8px;
+        }
+
+        .wa-bubble::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -10px;
+            width: 0;
+            height: 0;
+            border: 10px solid transparent;
+            border-top-color: #fff;
+            border-bottom: 0;
+            border-left: 0;
+        }
+
+        .wa-time {
+            font-size: 11px;
+            color: #999;
+            float: right;
+            margin-top: 6px;
+            margin-left: 12px;
+        }
+
+        .wa-link {
+            color: #027EB5;
+            text-decoration: none;
+            word-break: break-all;
+        }
+
+        .red-flag {
+            background: rgba(220, 38, 38, 0.15);
+            border-bottom: 2px dashed #DC2626;
+            cursor: pointer;
+            border-radius: 3px;
+            transition: background 0.2s;
+            position: relative;
+        }
+
+        .red-flag:hover {
+            background: rgba(220, 38, 38, 0.3);
+        }
+
+        .attack-meta {
+            padding: 24px;
+        }
+
+        .breakdown-card {
+            background: var(--bg);
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            border-left: 4px solid var(--purple);
+            margin-bottom: 16px;
+            font-size: 0.95rem;
+        }
+
+        .counter-card {
+            background: #ECFDF5;
+            padding: 16px;
+            border-radius: var(--radius-sm);
+            border-left: 4px solid var(--green);
+            font-size: 0.95rem;
+        }
+
+        .defence-plan {
+            background: var(--dark);
+            color: white;
+            padding: 40px;
+            border-radius: var(--radius);
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .defence-plan h2 {
+            margin-bottom: 24px;
+            font-size: 1.8rem;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: var(--dark);
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            z-index: 10;
+            transform: translateY(-100%);
+            margin-top: -8px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s;
+            white-space: nowrap;
+            max-width: 250px;
+            text-wrap: wrap;
+            text-align: center;
+            left: 50%;
+            transform: translate(-50%, -100%);
+        }
+
+        .red-flag:hover .tooltip {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        @media (max-width: 768px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .radar-container {
+                width: 100%;
+                height: 280px;
+            }
+
+            .attack-card {
+                margin: 0 0 24px 0;
+                border-radius: var(--radius-sm);
+            }
+
+            .wa-bubble {
+                font-size: 14px;
+            }
+
+            .defence-plan {
+                padding: 24px;
+            }
+
+            .score-badge {
+                top: -1px;
+                margin-bottom: 24px;
+                border-radius: 0;
+                margin-left: -24px;
+                margin-right: -24px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="overlay" class="overlay">Analyzing your responses...</div>
+
+    <div id="results-container" class="results-container">
+        <div id="score-badge" class="score-badge">
+            RESILIENCE SCORE: <span id="score-val">0</span>/100
+            <span id="score-label" style="margin-left:8px;">[...]</span>
+        </div>
+
+        <div class="results-grid">
+            <div class="radar-container">
+                <canvas id="radar-chart"></canvas>
+            </div>
+            <div class="weakness-list">
+                <h3>YOUR VULNERABILITIES</h3>
+                <div id="ranked-list"></div>
+            </div>
+        </div>
+
+        <div id="simulations-container">
+            <!-- Injected via script -->
+        </div>
+
+        <div class="defence-plan">
+            <h2>YOUR PERSONAL DEFENCE PLAN</h2>
+            <div id="defence-tactics" style="text-align:left; margin-bottom: 32px; line-height: 1.8;"></div>
+
+            <button class="cta-btn" onclick="shareScore()">Share My Score</button>
+            <button class="skip-btn" style="color:rgba(255,255,255,0.7);" onclick="location.href='index.html'">Retake
+                Assessment</button>
+        </div>
+
+        <footer
+            style="text-align:center; padding: 24px 0; color:var(--text-muted); font-size:0.9rem; border-top: 1px solid var(--border);">
+            ⚠️ Suspect a real scam? Call Cyber Crime Helpline: <strong>1930</strong>
+        </footer>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="radar.js"></script>
+    <script src="generator.js"></script>
+
+    <script>
+        let profileData = null;
+        let contextData = null;
+        let generatedSimulations = [];
+
+        const triggerColors = {
+            authority: "var(--authority)",
+            urgency: "var(--urgency)",
+            scarcity: "var(--scarcity)",
+            social_proof: "var(--social-proof)",
+            reciprocity: "var(--reciprocity)",
+            liking: "var(--liking)",
+            none: "var(--text-muted)"
+        };
+
+        function getTriggerDisplay(t) {
+            if (!t) return "Unknown";
+            return t.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        }
+
+        // Decode URL params
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const dataParam = urlParams.get('data');
+            if (dataParam) {
+                const decoded = JSON.parse(atob(dataParam));
+                profileData = decoded.profile;
+                contextData = decoded.context;
+            } else {
+                throw new Error("No data found");
+            }
+        } catch (e) {
+            console.error(e);
+            profileData = {
+                normalized: { authority: 80, urgency: 95, scarcity: 10, social_proof: 40, reciprocity: 20, liking: 5 },
+                ranked: [{ trigger: "urgency", score: 95 }, { trigger: "authority", score: 80 }, { trigger: "social_proof", score: 40 }, { trigger: "reciprocity", score: 20 }, { trigger: "scarcity", score: 10 }, { trigger: "liking", score: 5 }],
+                overallResilience: 12
+            };
+            contextData = { name: "Ravi", college: "IIT Bombay", dept: "CS" };
+            showToast("Using fallback data for demo", "warning");
+        }
+
+        async function initializeResults() {
+            // 1. Kick off generator
+            await window.initGenerator();
+            generatedSimulations = window.generateAttackSimulations(profileData, contextData);
+
+            // Try to AI enhance the first one
+            try {
+                const enhanced = await window.enhanceWithAI(generatedSimulations[0].message, contextData);
+                if (enhanced && enhanced !== generatedSimulations[0].message) {
+                    generatedSimulations[0].message = enhanced;
+                    showToast("AI model loaded — simulation enhanced", "success");
+                }
+            } catch (e) {
+                console.log("AI Offline, using templates");
+            }
+
+            // 2. Render UI shell
+            buildSimulationsUI(generatedSimulations);
+
+            const listContainer = document.getElementById('ranked-list');
+            listContainer.innerHTML = profileData.ranked.map(r => `
+        <div class="weakness-item">
+          <span style="display:flex; align-items:center; gap:8px;">
+            <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:${triggerColors[r.trigger]}"></span>
+            ${getTriggerDisplay(r.trigger)}
+          </span>
+          <span>${r.score}/100</span>
+        </div>
+      `).join('');
+
+            let p = profileData.overallResilience;
+            const badge = document.getElementById('score-badge');
+            const label = document.getElementById('score-label');
+            if (p < 40) {
+                badge.className = "score-badge score-high";
+                label.innerText = "[HIGH RISK] 🔴";
+            } else if (p < 70) {
+                badge.className = "score-badge score-med";
+                label.innerText = "[MODERATE RISK] 🟡";
+            } else {
+                badge.className = "score-badge score-low";
+                label.innerText = "[RESILIENT] 🟢";
+            }
+
+            const defenceContainer = document.getElementById('defence-tactics');
+            defenceContainer.innerHTML = generatedSimulations.slice(0, 3).map(sim => `
+        <div style="margin-bottom: 12px;">✅ <strong>${getTriggerDisplay(sim.triggers_used[0])}:</strong> ${sim.counter_tactic}</div>
+      `).join('');
+
+            // 3. Start Animation Sequence
+            runRevealSequence();
+        }
+
+        function buildSimulationsUI(sims) {
+            const container = document.getElementById('simulations-container');
+            container.innerHTML = sims.map((sim, idx) => `
+        <div class="attack-card" id="sim-card-${idx}">
+          <div class="whatsapp-container">
+            <div class="whatsapp-header">
+              <div class="wa-avatar">🏛️</div>
+              <div>
+                <div class="wa-name">+91 98XXX-XXXXX</div>
+                <div class="wa-status">Unknown Contact</div>
+              </div>
+              <div class="wa-danger-badge">SIMULATED ATTACK</div>
+            </div>
+            <div class="wa-bubble">
+              <p id="sim-msg-${idx}" class="attack-text" style="white-space: pre-wrap; margin:0;"></p>
+              <span class="wa-time">Just now ✓✓</span>
+            </div>
+          </div>
+          <div class="attack-meta">
+            <h3 style="color:var(--dark); margin-bottom: 16px; font-size:1.2rem;">${sim.name}</h3>
+            <div class="breakdown-card">
+              <strong>Psychological Breakdown:</strong><br/>
+              <ul style="margin-top:8px; padding-left:20px; color:var(--text-muted);">
+                ${Object.entries(sim.psychological_breakdown).map(([t, desc]) => `<li><b>${getTriggerDisplay(t)}:</b> ${desc}</li>`).join('')}
+              </ul>
+            </div>
+            <div class="counter-card">
+              <strong>Counter Tactic:</strong> ${sim.counter_tactic}
+            </div>
+          </div>
+        </div>
+      `).join('');
+        }
+
+        const delay = ms => new Promise(r => setTimeout(r, ms));
+
+        async function runRevealSequence() {
+            // Step 1: Delay
+            await delay(1500);
+
+            // Step 2: Fade overlay
+            document.getElementById('overlay').classList.add('hidden');
+            document.getElementById('results-container').style.display = 'block';
+            await delay(200);
+
+            // Step 3: Count up score
+            const finalScore = profileData.overallResilience;
+            countUpScore('score-val', 0, finalScore, 1000);
+            await delay(1200);
+
+            // Step 5: Render radar
+            window.renderRadar(profileData.normalized);
+            await delay(800);
+
+            // Step 6: Reveal simulations one by one
+            for (let i = 0; i < generatedSimulations.length; i++) {
+                const card = document.getElementById(`sim-card-${i}`);
+                card.classList.add('visible');
+                await delay(300);
+
+                // Step 7: Typewriter effect
+                const msgEl = document.getElementById(`sim-msg-${i}`);
+                await typeWriter(msgEl, generatedSimulations[i].message);
+
+                // Step 8: Red flags
+                highlightRedFlags(msgEl, generatedSimulations[i].red_flags);
+                await delay(500);
+            }
+        }
+
+        function countUpScore(id, start, end, duration) {
+            const el = document.getElementById(id);
+            let startTime = null;
+            function step(timestamp) {
+                if (!startTime) startTime = timestamp;
+                const progress = Math.min((timestamp - startTime) / duration, 1);
+                el.innerText = Math.floor(progress * (end - start) + start);
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                } else {
+                    el.innerText = end;
+                }
+            }
+            window.requestAnimationFrame(step);
+        }
+
+        async function typeWriter(element, text, speed = 12) {
+            element.innerHTML = "";
+            for (let i = 0; i < text.length; i++) {
+                element.innerHTML += text.charAt(i).replace('\n', '<br/>');
+                await delay(speed);
+            }
+        }
+
+        function highlightRedFlags(element, redFlags) {
+            let html = element.innerHTML;
+            // Simple heuristic: just highlight some random keywords if exact match isn't found
+            // Realistically we'd map red flags to text segments. For the hackathon, we'll wrap a few keywords.
+            const triggerWords = ["immediately", "2 hours", "Digital Arrest", "Press 1", "click here", "block", "freeze", "urgent", "OTP", "token advance", "only 3 seats", "₹", "UPI"];
+
+            triggerWords.forEach((word) => {
+                const regex = new RegExp(`(${word})`, 'gi');
+                html = html.replace(regex, `<span class="red-flag">$1<div class="tooltip">Known psychological manipulation trigger</div></span>`);
+            });
+            element.innerHTML = html;
+        }
+
+        function shareScore() {
+            const text = `I just took the PsychShield assessment and got a Resilience Score of ${profileData.overallResilience}/100. My top vulnerability is ${getTriggerDisplay(profileData.ranked[0].trigger)}.\n\nTest your own psychological attack surface at [link]!`;
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Score copied to clipboard!", "success");
+            });
+        }
+
+        function showToast(msg, type = "info") {
+            const colors = { info: '#4F3AC0', warning: '#D97706', error: '#DC2626', success: '#059669' };
+            const t = document.createElement('div');
+            t.className = 'toast';
+            t.style.background = colors[type];
+            t.textContent = msg;
+            document.getElementById('toast-container').appendChild(t);
+            requestAnimationFrame(() => t.classList.add('visible'));
+            setTimeout(() => { t.classList.remove("visible"); setTimeout(() => t.remove(), 300); }, 3500);
+        }
+
+        // Run on boot
+        initializeResults();
+
+    </script>
+</body>
+
+</html>

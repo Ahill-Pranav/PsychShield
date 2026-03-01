@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1, viewport-fit=cover">
+  <title>PsychShield 🧠 - Discover Your Psychological Attack Surface</title>
+  
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1E1B4B">
+
+  <!-- Chart.js for radar chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+  <!-- Transformers.js for on-device AI generation -->
+  <!-- Loaded dynamically in generator.js to avoid blocking -->
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Threat Counter -->
+  <div class="threat-strip">
+    <div class="container">
+      <span class="counter" id="frauds-counter">0</span> UPI frauds last year &middot; 
+      <span class="counter" id="cases-counter">0</span> cases reported &middot; 
+      ₹<span class="counter" id="lost-counter">0</span>Cr lost
+    </div>
+  </div>
+
+  <!-- Hero Section -->
+  <header class="hero">
+    <div class="container fade-up fade-up-hero">
+      <h1>PsychShield 🧠</h1>
+      <p>Every cybersecurity tool trains you to spot bad links. PsychShield shows you the psychological trigger an attacker would pull to bypass your judgment entirely — before they get the chance.</p>
+      
+      <!-- Start Button starts the quiz dynamically inside index.html -->
+      <button class="cta-btn" id="start-btn" onclick="startQuiz()">Start Assessment</button>
+    </div>
+  </header>
+
+  <!-- How It Works Section -->
+  <section class="how-it-works container" id="how-it-works">
+    <h2 class="fade-up">How It Works</h2>
+    <div class="cards">
+      <div class="card fade-up">
+        <span class="card-icon">🧐</span>
+        <h3>1. Assess</h3>
+        <p>Answer 8 interactive situational judgment questions designed to reveal your exact psychological vulnerabilities based on Cialdini's principles.</p>
+      </div>
+      <div class="card fade-up">
+        <span class="card-icon">⚠️</span>
+        <h3>2. Simulate</h3>
+        <p>Experience hyper-realistic, personalized attack simulations built to exploit your specific triggers. Generated completely on-device.</p>
+      </div>
+      <div class="card fade-up">
+        <span class="card-icon">🛡️</span>
+        <h3>3. Defend</h3>
+        <p>Get a detailed Resilience Score and actionable counter-tactics mapping directly to your psychological profile.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trust Strip -->
+  <div class="trust-strip container fade-up" id="trust-strip">
+    <div class="trust-item"><span class="trust-icon">🔒</span> No data stored</div>
+    <div class="trust-item"><span class="trust-icon">⚡</span> Runs on your device</div>
+    <div class="trust-item"><span class="trust-icon">👤</span> No login required</div>
+  </div>
+
+  <!-- Main Quiz Area (Hidden by default) -->
+  <main id="quiz-container" class="container quiz-container-wrapper" style="display: none;">
+    <div id="quiz-content"></div>
+  </main>
+
+  <!-- Context Collection Area (Hidden by default) -->
+  <section id="context-container" class="container context-container-wrapper" style="display: none;">
+    <div class="context-card">
+      <h2>Make your simulation more realistic <span class="badge">Optional</span></h2>
+      <p>Enter these details to personalize the simulation. We store <strong>nothing</strong>.</p>
+      <div class="input-group">
+        <label>First Name</label>
+        <input type="text" id="ctx-name" placeholder="e.g. Rahul" />
+      </div>
+      <div class="input-group">
+        <label>College Name</label>
+        <input type="text" id="ctx-college" placeholder="e.g. IIT Bombay" />
+      </div>
+      <div class="input-group">
+        <label>Department</label>
+        <input type="text" id="ctx-dept" placeholder="e.g. Computer Science" />
+      </div>
+      <button class="cta-btn" style="width:100%; margin-top: 16px;" onclick="finishContext()">Reveal My Vulnerability Profile</button>
+      <button class="skip-btn" onclick="finishContext(true)">Skip & Show Generic Profile</button>
+    </div>
+  </section>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <script src="quiz.js"></script>
+  <script src="cialdini.js"></script>
+
+  <script>
+    // Intersection Observer for animations
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-up').forEach(el => observer.observe(el));
+
+    // Counter animation
+    function animateCounters() {
+      const counters = [
+        { id: 'frauds-counter', max: 1.2, suffix: 'M', float: true },
+        { id: 'cases-counter', max: 6.32, suffix: 'L', float: true },
+        { id: 'lost-counter', max: 485, suffix: '', float: false }
+      ];
+
+      counters.forEach(c => {
+        let current = 0;
+        let increment = c.max / 40;
+        let el = document.getElementById(c.id);
+        
+        let intv = setInterval(() => {
+          current += increment;
+          if(current >= c.max) {
+            current = c.max;
+            clearInterval(intv);
+          }
+          el.innerText = (c.float ? current.toFixed(current === c.max ? 1 : 2) : Math.floor(current)) + c.suffix;
+          if (c.id === "cases-counter" && current === c.max) {
+            el.innerText = "6.32L"; // exact fix for demo
+          }
+          if (c.id === "frauds-counter" && current === c.max) {
+            el.innerText = "1.2M";
+          }
+        }, 30);
+      });
+    }
+
+    setTimeout(() => {
+      document.querySelector('.fade-up-hero').classList.add('visible');
+      animateCounters();
+    }, 100);
+
+    function startQuiz() {
+      document.querySelector('.hero').style.display = 'none';
+      document.getElementById('how-it-works').style.display = 'none';
+      document.getElementById('trust-strip').style.display = 'none';
+      document.querySelector('.threat-strip').style.display = 'none';
+      
+      document.getElementById('quiz-container').style.display = 'block';
+      
+      if(window.initQuiz) initQuiz();
+    }
+  </script>
+  
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/service-worker.js').catch(err => console.log('SW registration failed:', err));
+      });
+    }
+  </script>
+</body>
+</html>

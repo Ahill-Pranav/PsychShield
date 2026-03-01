@@ -1,0 +1,140 @@
+:root {
+  /* Brand */                                              
+  --indigo:       #4F3AC0;   /* primary CTA               */
+  --indigo-light: #7C5CFC;   /* hover states              */
+  --indigo-bg:    #EEF2FF;   /* light panel backgrounds   */
+  --purple:       #7C3AED;   /* secondary accent          */
+  --amber:        #D97706;   /* warning / urgency trigger */
+  --red:          #DC2626;   /* danger / high risk        */
+  --green:        #059669;   /* safe / resilient          */
+  --dark:         #1E1B4B;   /* header background         */
+
+  /* Neutrals */                                           
+  --bg:           #FAFAFF;   /* page background           */
+  --surface:      #FFFFFF;   /* card background           */
+  --border:       #E5E7EB;                                 
+  --text-primary: #111827;                                 
+  --text-muted:   #6B7280;                                 
+
+  /* Trigger Colors (one per Cialdini trigger)  */
+  --authority:    #1D4ED8;   /* blue                      */
+  --urgency:      #DC2626;   /* red                       */
+  --scarcity:     #D97706;   /* amber                     */
+  --social-proof: #7C3AED;   /* purple                    */
+  --reciprocity:  #059669;   /* green                     */
+  --liking:       #DB2777;   /* pink                      */
+
+  /* Spacing + Shape */                                    
+  --radius:       14px;                                    
+  --radius-sm:    8px;                                     
+  --shadow:       0 2px 16px rgba(0,0,0,0.08);            
+  --shadow-lg:    0 8px 40px rgba(79,58,192,0.18);        
+}
+
+/* Base Styles */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg);
+  color: var(--text-primary);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+/* Threat counter strip */
+.threat-strip { background: var(--red); color: white; padding: 12px 0; text-align: center; font-weight: 600; font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; }
+.counter { transition: all 2s ease-out; }
+
+/* Hero */
+.hero { background: var(--dark); color: white; padding: 100px 0; text-align: center; min-height: 70vh; display: flex; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.hero h1 { font-weight: 800; font-size: 4rem; margin-bottom: 24px; letter-spacing: -0.03em; }
+.hero p { font-size: 1.35rem; color: #cbd5e1; max-width: 700px; margin: 0 auto 40px; }
+
+/* Glowing CTA button */
+.cta-btn {
+  background: var(--indigo);
+  color: white;
+  border: none;
+  padding: 18px 48px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+  box-shadow: 0 0 0 0 rgba(79,58,192,0.5);
+  animation: ctaPulse 2s ease-in-out infinite;
+  transition: transform 0.2s, background 0.2s;
+}
+.cta-btn:hover { background: var(--indigo-light); transform: translateY(-3px); }
+@keyframes ctaPulse {
+  0%,100% { box-shadow: 0 0 0 0 rgba(79,58,192,0.4); }
+  50%      { box-shadow: 0 0 0 16px rgba(79,58,192,0); }
+}
+
+/* How it works */
+.how-it-works { padding: 100px 0; text-align: center; }
+.how-it-works h2 { margin-bottom: 56px; font-size: 2.5rem; font-weight: 800; color: var(--text-primary); }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 32px; }
+.card { background: var(--surface); padding: 40px 32px; border-radius: var(--radius); box-shadow: var(--shadow); border: 1px solid var(--border); transition: transform 0.3s; }
+.card:hover { transform: translateY(-5px); box-shadow: var(--shadow-lg); }
+.card-icon { font-size: 3rem; margin-bottom: 24px; display: inline-block; }
+.card h3 { font-size: 1.5rem; margin-bottom: 16px; color: var(--text-primary); font-weight: 700; }
+.card p { color: var(--text-muted); font-size: 1.1rem; line-height: 1.6; }
+
+/* Trust Strip */
+.trust-strip { padding: 48px 0; border-top: 1px solid var(--border); text-align: center; color: var(--text-muted); font-size: 1rem; display: flex; justify-content: center; gap: 48px; flex-wrap: wrap; margin-bottom: 40px; font-weight: 600; }
+.trust-item { display: flex; align-items: center; gap: 12px; }
+.trust-icon { color: var(--green); font-size: 1.2rem; }
+
+/* Fade-up on scroll */
+.fade-up { opacity: 0; transform: translateY(24px); transition: opacity 0.5s ease-out, transform 0.5s ease-out; }
+.fade-up.visible { opacity: 1; transform: translateY(0); }
+
+/* Basic responsive rules */
+@media (max-width: 768px) {
+  .hero h1 { font-size: 2.8rem; }
+  .hero p { font-size: 1.15rem; }
+  .hero { padding: 60px 0; min-height: auto; }
+  .trust-strip { flex-direction: column; gap: 24px; padding: 32px 0; }
+  .cards { gap: 24px; }
+  
+  .option-btn { min-height: 52px; padding: 14px 16px; }
+  .cta-btn    { min-height: 52px; font-size: 16px; }
+}
+
+/* Quiz UI Components - Added ahead of time */
+.quiz-container-wrapper { padding: 60px 24px; max-width: 800px; margin: 0 auto; }
+.quiz-header { margin-bottom: 32px; }
+.progress-bar-bg { background: var(--border); height: 8px; border-radius: 4px; overflow: hidden; margin-top: 16px; }
+.progress-bar-fill { background: var(--indigo); height: 100%; width: 0%; transition: width 0.4s ease; }
+
+.question-card { background: var(--surface); border-radius: var(--radius); padding: 40px; box-shadow: var(--shadow-lg); border: 1px solid var(--border); transform: translateX(50px); opacity: 0; transition: transform 0.4s ease, opacity 0.4s ease; }
+.question-card.active { transform: translateX(0); opacity: 1; }
+.question-card.exiting { transform: translateX(-50px) scale(0.95); opacity: 0; }
+
+.scenario-text { font-size: 1.25rem; font-weight: 600; margin-bottom: 24px; color: var(--dark); line-height: 1.5; background: var(--indigo-bg); padding: 24px; border-radius: var(--radius-sm); border-left: 4px solid var(--indigo); }
+.question-text { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 24px; font-weight: 600; }
+
+.options-grid { display: grid; gap: 16px; margin-top: 24px; }
+.option-btn { background: var(--surface); border: 2px solid var(--border); border-radius: var(--radius-sm); padding: 16px 24px; text-align: left; font-size: 1rem; font-weight: 500; color: var(--text-primary); cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif;}
+.option-btn:hover { border-color: var(--indigo); background: var(--indigo-bg); transform: translateX(4px); }
+
+/* Context Card */
+.context-container-wrapper { padding: 60px 24px; max-width: 600px; margin: 0 auto; }
+.context-card { background: var(--surface); border-radius: var(--radius); padding: 40px; box-shadow: var(--shadow-lg); border: 1px solid var(--border); }
+.context-card h2 { font-size: 1.5rem; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+.badge { font-size: 0.8rem; background: var(--border); padding: 4px 10px; border-radius: 20px; color: var(--text-muted); }
+.context-card p { color: var(--text-muted); margin-bottom: 24px; }
+.input-group { margin-bottom: 16px; text-align: left; }
+.input-group label { display: block; font-size: 0.9rem; font-weight: 600; margin-bottom: 8px; color: var(--text-primary); }
+.input-group input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 1rem; font-family: 'Inter'; transition: border-color 0.2s; }
+.input-group input:focus { outline: none; border-color: var(--indigo); box-shadow: 0 0 0 3px var(--indigo-bg); }
+.skip-btn { background: transparent; color: var(--text-muted); border: none; width: 100%; padding: 12px; margin-top: 8px; cursor: pointer; font-weight: 600; transition: color 0.2s; }
+.skip-btn:hover { color: var(--text-primary); text-decoration: underline; }
+
+/* Toast */
+#toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+.toast { background: var(--dark); color: white; padding: 14px 24px; border-radius: var(--radius-sm); font-weight: 500; font-size: 0.95rem; box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(20px); transition: all 0.3s; }
+.toast.visible { opacity: 1; transform: translateY(0); }
